@@ -8,6 +8,7 @@ module.exports = {
     .addIntegerOption(opt => opt.setName('caseid').setDescription('Case ID to update').setRequired(true))
     .addStringOption(opt => opt.setName('reason').setDescription('New reason').setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+    restricted: true,
 
   async execute(interaction) {
     const caseId = interaction.options.getInteger('caseid');

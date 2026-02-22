@@ -11,6 +11,7 @@ module.exports = {
         )
         .addStringOption((opt) => opt.setName("reason").setDescription("Reason for warning"))
         .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+        restricted: true,
 
     async execute(interaction) {
         const user = interaction.options.getUser("user");

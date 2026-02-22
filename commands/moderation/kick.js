@@ -16,6 +16,7 @@ module.exports = {
                 .setDescription("Reason for kick")
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers),
+        restricted: true,
 
     async execute(interaction) {
         const user = interaction.options.getUser("user");

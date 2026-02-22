@@ -7,6 +7,7 @@ module.exports = {
     .setDescription('List warnings for a user')
     .addUserOption(opt => opt.setName('user').setDescription('User to fetch warnings for').setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+    restricted: true,
 
   async execute(interaction) {
     const user = interaction.options.getUser('user');

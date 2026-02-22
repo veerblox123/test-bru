@@ -1,30 +1,24 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
-const Config = require("../../models/Config");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName("automod")
-        .setDescription("Enable or disable automod")
-        .addStringOption(opt =>
-            opt.setName("state")
-                .setDescription("on/off")
-                .setRequired(true)
-                .addChoices(
-                    { name: "on", value: "on" },
-                    { name: "off", value: "off" }
-                )
+  data: new SlashCommandBuilder()
+    .setName("automod")
+    .setDescription("Toggle automod")
+    .addStringOption(opt =>
+      opt.setName("state")
+        .setDescription("on/off")
+        .setRequired(true)
+        .addChoices(
+          { name: "on", value: "on" },
+          { name: "off", value: "off" }
         )
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    ),
 
-    async execute(interaction) {
-        const state = interaction.options.getString("state");
+  restricted: true,
 
-        let config = await Config.findOne({ guildId: interaction.guild.id });
-        if (!config) config = await Config.create({ guildId: interaction.guild.id });
+  async execute(interaction) {
+    const state = interaction.options.getString("state");
 
-        config.automod = state === "on";
-        await config.save();
-
-        await interaction.editReply(`🤖 Automod ${state}`);
-    }
+    await interaction.reply(`⚙️ Automod ${state}`);
+  },
 };

@@ -1,28 +1,28 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName("invite")
-        .setDescription("Check invite stats")
-        .addUserOption(opt =>
-            opt.setName("user")
-                .setDescription("User to check")
-        ),
+  data: new SlashCommandBuilder()
+    .setName("invite")
+    .setDescription("Check invite stats")
+    .addUserOption(opt =>
+      opt.setName("user").setDescription("User")
+    ),
 
-    async execute(interaction) {
-        const target = interaction.options.getUser("user") || interaction.user;
+  async execute(interaction) {
+    const user = interaction.options.getUser("user") || interaction.user;
 
-        const invites = await interaction.guild.invites.fetch();
+    const embed = new EmbedBuilder()
+      .setColor("Aqua")
+      .setTitle("Invite log")
+      .setDescription(`>> ${user.username} has 0 invites`)
+      .addFields(
+        { name: "Joins", value: "0", inline: true },
+        { name: "Left", value: "0", inline: true },
+        { name: "Fake", value: "0", inline: true },
+        { name: "Rejoins", value: "0", inline: true }
+      )
+      .setFooter({ text: `Requested by ${interaction.user.username}` });
 
-        const userInvites = invites.filter(inv => inv.inviter && inv.inviter.id === target.id);
-
-        let total = 0;
-        userInvites.forEach(inv => {
-            total += inv.uses || 0;
-        });
-
-        await interaction.editReply(
-            `📨 ${target.tag} has **${total} invites**`
-        );
-    }
+    await interaction.reply({ embeds: [embed] });
+  },
 };

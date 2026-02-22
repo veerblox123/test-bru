@@ -1,38 +1,64 @@
-const { EmbedBuilder } = require("discord.js");
-const log = require("../utils/logger");
+const Config = require("../models/Config");
 
 module.exports = (client) => {
+    client.on("messageCreate", async (message) => {
+        try {
+            if (!message.guild || message.author.bot) return;
 
-    client.on("messageDelete", async (message) => {
-        if (!message.guild || message.author?.bot) return;
+            const config = await Config.findOne({ guildId: message.guild.id });
 
-        const embed = new EmbedBuilder()
-            .setColor("Red")
-            .setTitle("🗑️ Message Deleted")
-            .addFields(
-                { name: "User", value: message.author.tag, inline: true },
-                { name: "Channel", value: `${message.channel}`, inline: true },
-                { name: "Content", value: message.content || "None" }
-            )
-            .setTimestamp();
+            // ❌ If no config or automod off → skip
+            if (!config || !config.automod) return;
 
-        log(message.guild, "message", embed);
+            // ❌ Ignore channel
+            if (config.ignoredChannels?.includes(message.channel.id)) return;
+
+            // ❌ Ignore roles
+            if (message.member.roles.cache.some(r => config.ignoredRoles?.includes(r.id))) return;
+
+            // =========================
+            // 🚨 BAD WORD FILTER
+            // =========================
+            const badWords = [
+                "fuck",
+                "bitch",
+                "asshole",
+                "nigga",
+                "idiot",
+                "stupid"
+            ];
+
+            const content = message.content.toLowerCase();
+
+            if (badWords.some(word => content.includes(word))) {
+                await message.delete().catch(() => {});
+
+                await message.channel.send({
+                    content: `⚠️ ${message.author}, watch your language!`,
+                });
+
+                return;
+            }
+
+            // =========================
+            // 🚨 LINK FILTER (OPTIONAL)
+            // =========================
+            if (config.filterLinks) {
+                const linkRegex = /(https?:\/\/[^\s]+)/g;
+
+                if (linkRegex.test(content)) {
+                    await message.delete().catch(() => {});
+
+                    await message.channel.send({
+                        content: `🚫 ${message.author}, links are not allowed!`,
+                    });
+
+                    return;
+                }
+            }
+
+        } catch (err) {
+            console.error("Automod error:", err);
+        }
     });
-
-    client.on("messageUpdate", async (oldMsg, newMsg) => {
-        if (!oldMsg.guild || oldMsg.author?.bot) return;
-
-        const embed = new EmbedBuilder()
-            .setColor("Yellow")
-            .setTitle("✏️ Message Edited")
-            .addFields(
-                { name: "User", value: oldMsg.author.tag, inline: true },
-                { name: "Before", value: oldMsg.content || "None" },
-                { name: "After", value: newMsg.content || "None" }
-            )
-            .setTimestamp();
-
-        log(oldMsg.guild, "message", embed);
-    });
-
 };

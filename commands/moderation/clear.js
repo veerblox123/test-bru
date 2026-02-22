@@ -1,20 +1,23 @@
-const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName("clear")
-        .setDescription("Clear messages")
-        .addIntegerOption(opt =>
-            opt.setName("amount")
-                .setDescription("Number of messages")
-                .setRequired(true)
-        )
-        .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+  data: new SlashCommandBuilder()
+    .setName("clear")
+    .setDescription("Clear messages")
+    .addIntegerOption(opt =>
+      opt.setName("amount").setDescription("Amount").setRequired(true)
+    ),
 
-    async execute(interaction) {
-        const amount = interaction.options.getInteger("amount");
+  restricted: true,
 
-        await interaction.channel.bulkDelete(amount, true);
-        await interaction.reply({ content: `🧹 Cleared ${amount}`, ephemeral: true });
-    }
+  async execute(interaction) {
+    const amount = interaction.options.getInteger("amount");
+
+    await interaction.channel.bulkDelete(amount);
+
+    await interaction.reply({
+      content: `🧹 Deleted ${amount} messages`,
+      ephemeral: true,
+    });
+  },
 };

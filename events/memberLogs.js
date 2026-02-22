@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
-const log = require("../utils/logger");
+
 
 module.exports = (client) => {
 

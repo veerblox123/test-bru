@@ -7,6 +7,7 @@ module.exports = {
     .setDescription('List cases for a user')
     .addUserOption(opt => opt.setName('user').setDescription('User to list cases for').setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+    restricted: true,
 
   async execute(interaction) {
     const user = interaction.options.getUser('user');

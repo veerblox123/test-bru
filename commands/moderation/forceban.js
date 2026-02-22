@@ -10,6 +10,7 @@ module.exports = {
                 .setRequired(true)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
+        restricted: true,
 
     async execute(interaction) {
         const id = interaction.options.getString("userid");

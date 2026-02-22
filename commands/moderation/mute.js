@@ -16,6 +16,7 @@ module.exports = {
                 .setDescription("Mute time in seconds")
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
+        restricted: true,
 
     async execute(interaction) {
         const user = interaction.options.getUser("user");

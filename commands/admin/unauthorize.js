@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
-const Auth = require("../../models/auth");
+const Auth = require("../../models/Auth");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,18 +11,16 @@ module.exports = {
                 .setRequired(true)
         ),
 
-    async execute(interaction) {
-        if (interaction.user.id !== process.env.OWNER_ID) {
-            return interaction.editReply("❌ Only owner");
-        }
+    restricted: true,
 
+    async execute(interaction) {
         const user = interaction.options.getUser("user");
 
-        await Auth.deleteOne({
+        await Auth.findOneAndDelete({
+            guildId: interaction.guild.id,
             userId: user.id,
-            guildId: interaction.guild.id
         });
 
-        await interaction.editReply(`❌ Removed ${user.tag}`);
-    }
+        await interaction.reply(`❌ ${user.tag} removed from authorized`);
+    },
 };

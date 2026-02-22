@@ -8,6 +8,7 @@ module.exports = {
     .addUserOption(opt => opt.setName('user').setDescription('User to remove warning from').setRequired(true))
     .addIntegerOption(opt => opt.setName('index').setDescription('Warning index to remove (1-based)').setRequired(true))
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages),
+    restricted: true,
 
   async execute(interaction) {
     const user = interaction.options.getUser('user');

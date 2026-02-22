@@ -1,35 +1,28 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
-const log = require("../../utils/logger");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("ban")
-        .setDescription("Ban a user")
+        .setDescription("Ban user")
         .addUserOption(opt =>
-            opt.setName("user").setDescription("User").setRequired(true)
-        )
-        .addStringOption(opt =>
-            opt.setName("reason").setDescription("Reason")
+            opt.setName("user")
+                .setDescription("User")
+                .setRequired(true)
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers),
 
-    async execute(interaction) { // ✅ async here
+    restricted: true,
 
+    async execute(interaction) {
         const user = interaction.options.getUser("user");
-        const reason = interaction.options.getString("reason") || "No reason";
-
         const member = await interaction.guild.members.fetch(user.id).catch(() => null);
 
-        if (!member) return interaction.editReply("❌ User not found");
+        if (!member) {
+            return interaction.reply({ content: "❌ User not found", ephemeral: true });
+        }
 
-        await member.ban({ reason });
+        await member.ban();
 
-        await interaction.editReply(`🔨 Banned ${user.tag}`);
-
-        // ✅ LOG HERE (INSIDE FUNCTION)
-        await log(interaction.guild, "mod", {
-            title: "🔨 Ban",
-            description: `${user.tag} banned by ${interaction.user.tag}\nReason: ${reason}`
-        });
-    }
+        await interaction.reply(`✅ Banned ${user.tag}`);
+    },
 };

@@ -15,6 +15,7 @@ module.exports = {
                 )
         )
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+        restricted: true,
 
     async execute(interaction) {
         const state = interaction.options.getString("state");
