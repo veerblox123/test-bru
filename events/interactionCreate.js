@@ -1,4 +1,4 @@
-const Auth = require("../models/Auth");
+const Auth = require("../models/auth");
 
 module.exports = (client) => {
     client.on("interactionCreate", async (interaction) => {
@@ -8,33 +8,35 @@ module.exports = (client) => {
         if (!command) return;
 
         try {
-            // 🔒 Restricted system
-            if (command.restricted) {
-                const isOwner = interaction.guild.ownerId === interaction.user.id;
 
-                const isAuthorized = await Auth.findOne({
-                    guildId: interaction.guild.id,
-                    userId: interaction.user.id,
-                });
-
-                if (!isOwner && !isAuthorized) {
-                    return interaction.reply({
-                        content: "❌ You are not authorized to use this command.",
-                        ephemeral: true,
-                    });
-                }
+            // 👑 OWNER BYPASS
+            if (interaction.user.id === process.env.OWNER_ID) {
+                return command.execute(interaction);
             }
 
-            await command.execute(interaction, client);
+            // 🌐 NORMAL COMMAND
+            if (!command.restricted) {
+                return command.execute(interaction);
+            }
+
+            // 🔒 CHECK AUTH
+            const data = await Auth.findOne({
+                guildId: interaction.guild.id,
+                userId: interaction.user.id
+            });
+
+            if (!data) {
+                return interaction.reply({
+                    content: "❌ You are not authorized to use this command.",
+                    ephemeral: true
+                });
+            }
+
+            command.execute(interaction);
+
         } catch (err) {
             console.error(err);
-
-            if (!interaction.replied) {
-                interaction.reply({
-                    content: "❌ Error executing command",
-                    ephemeral: true,
-                });
-            }
+            interaction.reply({ content: "❌ Error", ephemeral: true });
         }
     });
 };

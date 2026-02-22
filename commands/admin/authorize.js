@@ -1,27 +1,27 @@
 const { SlashCommandBuilder } = require("discord.js");
-const Auth = require("../../models/Auth");
+const Auth = require("../../models/auth");
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("authorize")
-        .setDescription("Give full bot access")
+        .setDescription("Give access to user")
         .addUserOption(opt =>
-            opt.setName("user")
-                .setDescription("User")
-                .setRequired(true)
+            opt.setName("user").setDescription("User").setRequired(true)
         ),
 
-    restricted: true,
-
     async execute(interaction) {
+
+        if (interaction.user.id !== process.env.OWNER_ID) {
+            return interaction.reply({ content: "❌ Owner only", ephemeral: true });
+        }
+
         const user = interaction.options.getUser("user");
 
-        await Auth.findOneAndUpdate(
-            { guildId: interaction.guild.id, userId: user.id },
-            {},
-            { upsert: true }
-        );
+        await Auth.create({
+            guildId: interaction.guild.id,
+            userId: user.id
+        });
 
-        await interaction.reply(`✅ ${user.tag} is now authorized`);
-    },
+        interaction.reply(`✅ ${user.tag} authorized`);
+    }
 };
