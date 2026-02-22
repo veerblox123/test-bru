@@ -8,35 +8,43 @@ module.exports = (client) => {
         if (!command) return;
 
         try {
-
-            // 👑 OWNER BYPASS
+            // ✅ OWNER BYPASS (MOST IMPORTANT FIX)
             if (interaction.user.id === process.env.OWNER_ID) {
-                return command.execute(interaction);
+                return command.execute(interaction, client);
             }
 
-            // 🌐 NORMAL COMMAND
-            if (!command.restricted) {
-                return command.execute(interaction);
-            }
-
-            // 🔒 CHECK AUTH
-            const data = await Auth.findOne({
-                guildId: interaction.guild.id,
-                userId: interaction.user.id
-            });
-
-            if (!data) {
-                return interaction.reply({
-                    content: "❌ You are not authorized to use this command.",
-                    ephemeral: true
+            // ✅ ONLY CHECK AUTH IF COMMAND IS RESTRICTED
+            if (command.restricted) {
+                const data = await Auth.findOne({
+                    guildId: interaction.guild.id,
+                    userId: interaction.user.id
                 });
+
+                if (!data) {
+                    return interaction.reply({
+                        content: "❌ You are not authorized to use this command.",
+                        ephemeral: true
+                    });
+                }
             }
 
-            command.execute(interaction);
+            // ✅ NORMAL EXECUTION
+            await command.execute(interaction, client);
 
         } catch (err) {
             console.error(err);
-            interaction.reply({ content: "❌ Error", ephemeral: true });
+
+            if (interaction.replied || interaction.deferred) {
+                interaction.followUp({
+                    content: "❌ Error executing command",
+                    ephemeral: true
+                });
+            } else {
+                interaction.reply({
+                    content: "❌ Error executing command",
+                    ephemeral: true
+                });
+            }
         }
     });
 };
